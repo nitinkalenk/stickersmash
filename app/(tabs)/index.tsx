@@ -1,20 +1,77 @@
 import Button from "@/components/Button";
 import ImageViewer from "@/components/ImageViewer";
-import { Image } from "expo-image";
 import { View, StyleSheet, Text } from "react-native";
+import { launchImageLibraryAsync } from "expo-image-picker";
+import { useState } from "react";
+import IconButton from "@/components/IconButton";
+import CircleButton from "@/components/CircleButton";
+import EmojiPicker from "@/components/EmojiPicker";
 
 const placeHolder = require('@/assets/images/background-image.png');
 
 export default function Index() {
+
+  const [image, setImage] = useState<string | undefined>(undefined);
+  const [showAppOptions, setShowAppOptions] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const launchImagePickerAsync = async () => {
+    console.log('lanuching imnage picker');
+    let result = await launchImageLibraryAsync({
+      mediaTypes : ['images'],
+      allowsEditing : true,
+      quality : 1
+    });
+    if(!result.canceled) {
+      console.log(result);
+      setImage(result.assets[0].uri);
+      setShowAppOptions(true);
+    } else {
+      alert('You did not select any image');
+    }
+  }
+
+  const onReset = () => {
+    console.log('resetting');
+    setShowAppOptions(false);
+  }
+
+  const onOpenEmojiPopup = () => {
+    console.log('opening image popup');
+    setModalVisible(true);
+  }
+
+  const onSaveImageAsync = () => {
+    console.log('saving');
+  }
+
+  const onModalClose = () => {
+    console.log('on modal close');
+    setModalVisible(false);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <ImageViewer imgSource={placeHolder} />
+        <ImageViewer defaultImageSource={placeHolder} selectedImage={image}/>
       </View>
-      <View style={styles.footerContainer}>
-        <Button theme='primary' label="Choose a photo"></Button>
+      { showAppOptions ? (
+        <View style={styles.optionsContainer}>
+          <View style={styles.optionsRow}>
+            <IconButton icon="refresh" label="Reset" onPress={onReset}/>
+            <CircleButton onPress={onOpenEmojiPopup}/>
+            <IconButton icon="save-alt" label="Save" onPress={onSaveImageAsync} />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.footerContainer}>
+        <Button theme='primary' label="Choose a photo" onPress={launchImagePickerAsync}></Button>
         <Button label="Use this photo"></Button>
       </View>
+      ) }
+      <EmojiPicker visible={modalVisible} onClose={onModalClose}>
+
+      </EmojiPicker>
     </View>
   );
 }
@@ -31,5 +88,13 @@ const styles = StyleSheet.create({
   footerContainer : {
     flex : 1 / 3,
     alignItems : 'center',
+  },
+  optionsContainer : {
+    position : 'absolute',
+    bottom : 80
+  },
+  optionsRow : {
+    alignItems : 'center',
+    flexDirection : 'row'
   }
 });

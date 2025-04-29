@@ -2,10 +2,12 @@ import { Image, ImageSource } from "expo-image";
 import { StyleSheet } from "react-native";
 
 type ImageProps = {
-    imgSource : ImageSource
+    defaultImageSource : ImageSource,
+    selectedImage? : string
 }
 
-export default function ImageViewer({ imgSource } : ImageProps) {
+export default function ImageViewer({ defaultImageSource, selectedImage } : ImageProps) {
+    const imgSource = selectedImage ? { uri : selectedImage } : defaultImageSource;
     return (
         <Image source={imgSource} style={styles.image}></Image>
     );
